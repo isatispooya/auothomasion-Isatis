@@ -3,6 +3,7 @@ from rest_framework.views import APIView
 from GuardPyCaptcha.Captch import GuardPyCaptcha
 from rest_framework.response import Response
 from rest_framework import status
+from . import models
 
 
 
@@ -16,23 +17,24 @@ class OtpViewest(APIView):
     def post(self,request):
         captcha = GuardPyCaptcha()
         captcha = captcha.check_response(request.data['encrypted_response'],request.data['captcha'])
-        if False:
+        if False:#not captcha:
             result = {'message':'کد کپچا صحیح نمی باشد'}
             return Response(result,status=status.HTTP_406_NOT_ACCEPTABLE)
         national_code = request.data['national_code']
         if not national_code:
-            result = {'message':'شماره موبایل لازم است.'}
+            result = {'message':'کدملی لازم است'}
             return Response(result,status=status.HTTP_400_BAD_REQUEST)
+        
         try:
-            users = models.Uers.objects.get(national_code=national_code)
-            result = {'registered':True, 'message':'کد تایید ارسال شد'}
-
+            users = models.Users.objects.get(national_code=national_code)
+            otp = '11111'
+            otp_obj = models.Otp(code=otp,mobile=users.mobile)
+            otp_obj.save()
+            result = {'message':'کد تایید ارسال شد'}
+            return Response(result,status=status.HTTP_200_OK)   
         except models.Users.DoesNotExist:
-            result = {'registered':False,'message':'کد تایید ارسال شد'}
+            result = {'message':'کاربر یافت نشد'}
+            return Response(result,status=status.HTTP_401_UNAUTHORIZED)   
   
-        otp = '11111'# random.randint(10000,99999)
-        otp_obj = models.OTP(code=otp,national_code=national_code)
-        otp_obj.save()
-        return Response(result,status=status.HTTP_200_OK)
     
     
