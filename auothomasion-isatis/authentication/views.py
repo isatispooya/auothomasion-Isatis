@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from GuardPyCaptcha.Captch import GuardPyCaptcha
 from rest_framework.response import Response
 from rest_framework import status
-
+from . import models
 
 
 class CaptchaViewest(APIView):
@@ -24,14 +24,14 @@ class OtpViewest(APIView):
             result = {'message':'شماره موبایل لازم است.'}
             return Response(result,status=status.HTTP_400_BAD_REQUEST)
         try:
-            users = models.Uers.objects.get(national_code=national_code)
+            users = models.Users.objects.get(national_code=national_code)
             result = {'registered':True, 'message':'کد تایید ارسال شد'}
 
         except models.Users.DoesNotExist:
             result = {'registered':False,'message':'کد تایید ارسال شد'}
   
         otp = '11111'# random.randint(10000,99999)
-        otp_obj = models.OTP(code=otp,national_code=national_code)
+        otp_obj = models.Otp(code=otp,national_code=national_code)
         otp_obj.save()
         return Response(result,status=status.HTTP_200_OK)
     
