@@ -6,7 +6,6 @@ from rest_framework import status
 from . import models
 
 
-
 class CaptchaViewest(APIView):
     def get (self,request):
         captcha = GuardPyCaptcha()
