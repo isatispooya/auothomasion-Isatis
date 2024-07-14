@@ -4,6 +4,9 @@ from GuardPyCaptcha.Captch import GuardPyCaptcha
 from rest_framework.response import Response
 from rest_framework import status
 from . import models
+from . import serializers
+import datetime 
+from . import fun
 
 
 class CaptchaViewest(APIView):
@@ -38,8 +41,36 @@ class OtpViewest(APIView):
   
 class LoginViewest(APIView):
     def post(self,request):
-        national_code = request.data['national_code']
-        code = request.data['code']  
+        national_code = request.data.get('national_code')
+        code = request.data.get('code')  
 
-        if 
+        if not national_code or not code:
+            return Response({'message': 'کد ملی و کد تایید لازم است'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        user = models.Users.objects.get(national_code=national_code)
+        if not user:
+            return Response({'message':'کد ملی موجود نیست لطفا ثبت نام کنید'})
+        try:
+
+            mobile = user.mobile
+            otp_obj = models.Otp.objects.filter(mobile = mobile,code = code).order_by('-date').first()
+        except:
+            return Response({'message':'کد تایید نامعتبر است'})
+
+        otp_obj = serializers.OtpSerializers(otp_obj).data
+
+        if otp_obj ['code']== None:
+            return Response({'message':'کد تایید نامعتبر است'})
     
+        now = datetime.datetime.now()
+        deley = now-datetime.timedelta(minutes=120)
+        if otp_obj.date.timestamp()<=deley.timestamp():
+            result = {'message':'کد منقضی شده است'}
+            otp_obj.delete()
+            return Response(result,status=status.HTTP_400_BAD_REQUEST)
+        otp_obj.delete()
+        user = user.first()
+        token = fun.encryptionUser(user)
+
+        return Response({'token':token},status=status.HTTP_200_OK)
+
