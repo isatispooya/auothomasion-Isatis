@@ -6,7 +6,7 @@ from django.utils import timezone
 class Company(models.Model):
     name = models.CharField(max_length=200)
     telephone = models.CharField(max_length=200)
-    national_code = models.CharField(max_length=200,unique=True)
+    national_id = models.CharField(max_length=200,unique=True)
     subject = models.CharField(max_length=200)
     TYPE_CHOICES = [('s','سهامی خاص'),('g','سهامی عام')]
     type = models.CharField(max_length=1, choices=TYPE_CHOICES)
