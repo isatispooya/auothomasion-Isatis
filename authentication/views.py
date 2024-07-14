@@ -15,7 +15,8 @@ class CaptchaViewest(APIView):
 class OtpViewest(APIView):
     def post(self,request):
         captcha = GuardPyCaptcha()
-        captcha = captcha.check_response(request.data['encrypted_response'],request.data['captcha'])
+        print(request.data)
+        #captcha = captcha.check_response(request.data['encrypted_response'],request.data['captcha'])
         if False:#not captcha:
             result = {'message':'کد کپچا صحیح نمی باشد'}
             return Response(result,status=status.HTTP_406_NOT_ACCEPTABLE)
