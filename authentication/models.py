@@ -17,13 +17,6 @@ class Company(models.Model):
     def __str__(self):
         return f'{self.name}'
 
-class PositionJob(models.Model):
-    name = models.CharField(max_length=200)
-    level = models.CharField(max_length=200)
-   
-    def __str__(self):
-        return f'{self.name}'
-
 
 class Role(models.Model):
     title_choice =[('s','سهامدار'),('c','مشتری'),('e','کارمند')]
@@ -41,7 +34,6 @@ class Users(models.Model):
     profile_picture = models.ImageField(upload_to = 'static/image/',blank = True, null = True)
     date_birth=models.DateTimeField(blank=True, null=True)
     personel = models.BooleanField(default=False)
-    job = models.ForeignKey(PositionJob,on_delete=models.CASCADE, blank=True, null=True)
     
     def __str__(self):
         return f'{self.firstname} {self.lastname}'
@@ -53,3 +45,15 @@ class Otp(models.Model):
     
     def __str__(self) :
         return f'{self.code}'
+    
+
+
+class PositionJob(models.Model):
+    name = models.CharField(max_length=200)
+    level = models.CharField(max_length=200)
+    company = models.ForeignKey(Company, on_delete= models.CASCADE)
+    user = models.ForeignKey(Users, on_delete= models.CASCADE)
+
+   
+    def __str__(self):
+        return f'{self.name}'

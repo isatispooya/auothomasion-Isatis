@@ -5,8 +5,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from . import models
 from . import serializers
-import datetime 
+from datetime import datetime, timedelta
 from . import fun
+import pytz
 
 
 class CaptchaViewest(APIView):
@@ -50,27 +51,58 @@ class LoginViewest(APIView):
         user = models.Users.objects.get(national_code=national_code)
         if not user:
             return Response({'message':'کد ملی موجود نیست لطفا ثبت نام کنید'})
+        
         try:
 
             mobile = user.mobile
-            otp_obj = models.Otp.objects.filter(mobile = mobile,code = code).order_by('-date').first()
-        except:
+
+            otp_obj_ = models.Otp.objects.filter(mobile = mobile,code = code)
+
+            otp_obj_ = otp_obj_.order_by('-created_at')
+            otp_obj_ = otp_obj_.first()
+        except Exception as e:
             return Response({'message':'کد تایید نامعتبر است'})
 
-        otp_obj = serializers.OtpSerializers(otp_obj).data
+        otp_obj = serializers.OtpSerializers(otp_obj_).data
 
         if otp_obj ['code']== None:
             return Response({'message':'کد تایید نامعتبر است'})
     
-        now = datetime.datetime.now()
-        deley = now-datetime.timedelta(minutes=120)
-        if otp_obj.date.timestamp()<=deley.timestamp():
-            result = {'message':'کد منقضی شده است'}
+
+        now = datetime.now(pytz.UTC)
+        delay = now - timedelta(minutes=120)
+    
+        otp_obj['created_at'] = otp_obj['created_at']
+        print(otp_obj)
+        date_object = datetime.fromisoformat(otp_obj['created_at'][:-1])
+        date_object = date_object.replace(tzinfo=pytz.UTC).timestamp()
+
+        otp_obj['created_at'] = date_object
+
+        if otp_obj['created_at'] <= delay.timestamp():
             otp_obj.delete()
-            return Response(result,status=status.HTTP_400_BAD_REQUEST)
-        otp_obj.delete()
-        user = user.first()
+            return Response({'message': 'کد منقضی شده است'}, status=status.HTTP_400_BAD_REQUEST)
+
+        #otp_obj['created_at'] = otp_obj['created_at']
+        
+        otp_obj_.delete()
         token = fun.encryptionUser(user)
 
         return Response({'token':token},status=status.HTTP_200_OK)
 
+
+class ProfileViewset(APIView):
+    def get(self,request):
+        Authorization = request.headers.get('Authorization')
+        if not Authorization:
+            return Response({'message': 'توکن را وارد کنید'}, status=status.HTTP_400_BAD_REQUEST)
+        user = fun.decryptionUser(Authorization)
+        if not user:
+            return Response({'message': 'کاربر یافت نشد'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        user = user.first()
+        
+        profile_data = serializers.UsersSerializers(user).data
+        
+
+        return Response(profile_data)

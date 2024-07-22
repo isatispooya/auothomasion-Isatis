@@ -6,7 +6,7 @@ from ast import literal_eval
 
 
 def encryptionUser(user):
-    user = serializers.CustomerSerializer(user).data
+    user = serializers.UsersSerializers(user).data
     user = str(user)
     with open('secret.key', 'rb') as key_file:
         key = key_file.read()
@@ -24,7 +24,7 @@ def decryptionUser(Bearer):
         encrypted_bytes = base64.urlsafe_b64decode(token.encode())
         user = fernet.decrypt(encrypted_bytes).decode()
         user = literal_eval(user)
-        user = models.Customer.objects.filter(id=user['id'])
+        user = models.Users.objects.filter(id=user['id'])
         return user
-    except:
+    except: 
         return None

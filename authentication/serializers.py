@@ -25,3 +25,5 @@ class OtpSerializers(serializers.ModelSerializer):
     class Meta:
         model = models.Otp
         fields = '__all__'
+
+        

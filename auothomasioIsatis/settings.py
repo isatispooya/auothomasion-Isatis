@@ -29,9 +29,9 @@ DEBUG = True
 
 
 CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOW_CREDENTIALS = True  # در صورت نیاز
+# CORS_ALLOW_CREDENTIALS = True  # در صورت نیاز
 ALLOWED_HOSTS = ['*']
-
+# CORS_ALLOWED_ORIGINS = ['*']
 CORS_ALLOW_METHODS = [
     'DELETE',
     'GET',
@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
     'authentication',
     'letter',
     'rest_framework',
@@ -75,6 +76,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+        'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'auothomasioIsatis.urls'
