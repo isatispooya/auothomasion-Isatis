@@ -16,6 +16,8 @@ from random import randint
 from letter.models import Letter
 from persiantools.jdatetime import JalaliDate
 
+
+
 def receiver():
     receivers = PositionJob.objects.all()
     receivers_serializer  = PositionJobSerializer(receivers, many =True).data
@@ -41,7 +43,7 @@ def generate_number_letters():
 
     return letter_num
 
-
+#لیست گیرنده ها را به ما می دهد
 class ReceiverViewset(APIView):
     def get(self,request):
         Authorization = request.headers.get('Authorization')
@@ -52,6 +54,7 @@ class ReceiverViewset(APIView):
             return Response({'message': 'کاربر یافت نشد'}, status=status.HTTP_400_BAD_REQUEST)
             
         recieve =receiver()
+
 
         return Response(recieve, status=status.HTTP_200_OK)
 
@@ -74,7 +77,7 @@ class SenderViewset(APIView):
 
         return Response(sender_serializer, status=status.HTTP_200_OK)
     
-
+#ایجاد نامه
 class CreateletterViewset(APIView):
     
     def post(self,request):
@@ -105,7 +108,7 @@ class CreateletterViewset(APIView):
         except ValueError:
             return Response({'message': 'تاریخ نامعتبر است'}, status=status.HTTP_400_BAD_REQUEST)
         
-        
+
         try:
             receiver = PositionJob.objects.get(id=receiver_id)
             sender = PositionJob.objects.get(id=sender_id)
@@ -124,7 +127,7 @@ class CreateletterViewset(APIView):
         return Response({'message': 'نامه با موفقیت ایجاد شد'} ,status=status.HTTP_201_CREATED)
     
 
-    
+#مشخصات یک نامه را می فرستد    
 class DetailletterViewset(APIView):
     def get (self, request,id):
         
@@ -145,7 +148,7 @@ class DetailletterViewset(APIView):
         serializer = LetterSerializer(letter)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-
+# نامه های ارسال شده توسط کاربر را بهش نشان بدهد
 class BoxletterViewset(APIView):
     def get(self,request): 
         Authorization = request.headers.get('Authorization')
@@ -153,13 +156,23 @@ class BoxletterViewset(APIView):
             return Response({'message': 'توکن احراز هویت موجود نیست'}, status=status.HTTP_400_BAD_REQUEST)
         
         user = fun.decryptionUser(Authorization)
+      
         if not user:
             return Response({'message': 'کاربر یافت نشد'}, status=status.HTTP_400_BAD_REQUEST)
+        user_instance = user.first()
         
-        letters = Letter.objects.filter(receiver = user)
-        
-    
+        print(user_instance)
+
+        #position_jobs = PositionJob.objects.filter(user=user_instance)
+
+        letters = Letter.objects.filter(receiver = user_instance)
+        print(letters)
+
         serializer = LetterSerializer(letters, many =True)
         
+        print(serializer)
+        
+
         return Response(serializer.data, status=status.HTTP_200_OK)
     
+
